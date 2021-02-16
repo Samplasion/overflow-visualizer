@@ -8,7 +8,10 @@ function App() {
     const [bits, setBitsRaw] = React.useState(8);
     const [twos, setTwos] = [false, () => void 0];// React.useState(false);
     const maxBits = 31;
-    const [lower, upper] = [twos ? -(2**maxBits) : 0, 2**maxBits-1];
+    const getBounds = (bits: number) => {
+        return [twos ? -(2**bits) : 0, 2**(twos ? bits-1 : bits)-1] as const;
+    }
+    const [lower, upper] = getBounds(maxBits);
     const [t] = useTranslation();
 
     const setNumber = (n: number) => {
@@ -25,6 +28,12 @@ function App() {
         if (b > maxBits) b = maxBits;
         return setBitsRaw(b);
     }
+    const rshift = (n: number) => {
+        return twos ? n >> 1 : n >>> 1;
+    }
+
+    const stored = (number & getBounds(bits)[1]);
+
     return (
         <div className="flex flex-col min-h-full py-8 items-center justify-center text-white bg-gradient-to-br from-primary-800 to-yellow-900">
             <a href="/">
@@ -48,7 +57,7 @@ function App() {
                         {t("storedNumber")}
                     </div>
                     <div className="self-center">
-                        {number & (2**bits - 1)}
+                        {(number & getBounds(bits)[1])}
                     </div>
                 </div>
                 <div className="w-1/3">
@@ -57,7 +66,7 @@ function App() {
                             {t("bits")}
                         </div>
                         <div className="flex flex-row justify-center">
-                            <input min={1} max={maxBits} type="range" className="bg-gray-900 border border-gray-800 rounded" value={bits} onChange={input => setBits(parseInt(input.target.value))} />
+                            <input min={twos ? 2 : 1} max={maxBits} type="range" className="bg-gray-900 border border-gray-800 rounded" value={bits} onChange={input => setBits(parseInt(input.target.value))} />
                             <span className="ml-4 font-medium">{bits}</span>
                         </div>
                     </div>
@@ -66,7 +75,7 @@ function App() {
                             {t("number")}
                         </div>
                         <div className="flex flex-row justify-center">
-                            <button className="py-2 px-4 bg-primary-600 hover:bg-primary-700 text-wide rounded ml-2" onClick={() => setNumber(number >> 1)}>»</button>
+                            <button className="py-2 px-4 bg-primary-600 hover:bg-primary-700 text-wide rounded ml-2" onClick={() => setNumber(rshift(number))}>»</button>
                             <button className="py-2 px-4 bg-primary-600 hover:bg-primary-700 text-wide rounded mx-2" onClick={() => setNumber(number - 1)}>-</button>
                             <input /* min={lower} max={upper} */ type="number" className="bg-gray-900 border border-gray-800 rounded px-4" value={number} onChange={input => setNumber(parseInt(input.target.value))} />
                             <button className="py-2 px-4 bg-primary-600 hover:bg-primary-700 text-wide rounded mx-2" onClick={() => setNumber(number + 1)}>+</button>
@@ -79,7 +88,7 @@ function App() {
                         {t("maxWithBits", { count: bits })}
                     </div>
                     <div className="self-center">
-                        {(2**bits - 1)}
+                        {getBounds(bits)[1]}
                     </div>
                 </div>
             </div>

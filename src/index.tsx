@@ -14,7 +14,7 @@ i18next
     .use(initReactI18next)
     .init({
         resources: strings,
-        lng: detectBrowserLanguage()
+        lng: detectBrowserLanguage().replace(/_-/, "")
     });
 
 ReactDOM.render(<App />, document.getElementById('root'));
